@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(npm run build)",
-      "Bash(curl -s http://localhost:8080/api/setup/status)"
-    ]
-  }
-}
