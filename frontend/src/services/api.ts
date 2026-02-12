@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AuthResponse, Machine, MachineInput, SetupStatus, User, UserInput, DirectoryListing, Group, GroupInput, AuditLogResponse, AuditAction } from '../types';
+import type { LoginResponse, AppSettings, Machine, MachineInput, SetupStatus, User, UserInput, DirectoryListing, Group, GroupInput, AuditLogResponse, AuditAction } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -37,13 +37,20 @@ export const checkSetupStatus = async (): Promise<SetupStatus> => {
   return response.data;
 };
 
-export const setup = async (username: string, password: string): Promise<AuthResponse> => {
+export const setup = async (username: string, password: string): Promise<LoginResponse> => {
   const response = await api.post('/setup', { username, password });
   return response.data;
 };
 
-export const login = async (username: string, password: string): Promise<AuthResponse> => {
+export const login = async (username: string, password: string): Promise<LoginResponse> => {
   const response = await api.post('/login', { username, password });
+  return response.data;
+};
+
+export const verifyTOTP = async (tempToken: string, code: string): Promise<LoginResponse> => {
+  const response = await api.post('/login/totp', { code }, {
+    headers: { Authorization: `Bearer ${tempToken}` },
+  });
   return response.data;
 };
 
@@ -193,6 +200,17 @@ export const listAuditLogs = async (params?: {
 
 export const getAuditActions = async (): Promise<AuditAction[]> => {
   const response = await api.get('/audit/actions');
+  return response.data;
+};
+
+// Settings endpoints (admin only)
+export const getSettings = async (): Promise<AppSettings> => {
+  const response = await api.get('/settings');
+  return response.data;
+};
+
+export const updateSettings = async (settings: Partial<AppSettings>): Promise<AppSettings> => {
+  const response = await api.put('/settings', settings);
   return response.data;
 };
 

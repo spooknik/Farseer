@@ -117,97 +117,99 @@ export default function UserManagement({ onClose, currentUserId }: UserManagemen
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-800 rounded-lg w-full max-w-2xl max-h-[80vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h2 className="text-xl font-semibold text-white">User Management</h2>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+      <div className="border border-term-border bg-term-surface w-full max-w-2xl max-h-[80vh] flex flex-col">
+        {/* Title bar */}
+        <div className="flex items-center justify-between px-3 py-1.5 bg-term-surface-alt border-b border-term-border">
+          <span className="text-term-fg-dim text-xs font-mono">--[ user management ]--</span>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="text-xs text-term-fg-dim hover:text-term-red font-mono"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            [x]
           </button>
         </div>
 
         {/* Toolbar */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <span className="text-slate-400 text-sm">{users.length} users</span>
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-term-border">
+          <span className="text-term-fg-dim text-xs">{users.length} users</span>
           <button
             onClick={handleAdd}
-            className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+            className="px-2 py-0.5 text-xs border border-term-cyan text-term-cyan hover:bg-term-cyan hover:text-term-black font-mono"
           >
-            + Add User
+            [ + add user ]
           </button>
         </div>
 
         {/* User list */}
         <div className="flex-1 overflow-auto">
           {loading ? (
-            <div className="flex items-center justify-center h-32 text-slate-400">
+            <div className="flex items-center justify-center h-32 text-term-fg-dim text-xs">
               Loading...
             </div>
           ) : error ? (
-            <div className="flex items-center justify-center h-32 text-red-400">
-              {error}
+            <div className="flex items-center justify-center h-32 text-term-red text-xs">
+              [ERR] {error}
             </div>
           ) : (
             <table className="w-full">
-              <thead className="bg-slate-700/50 sticky top-0">
+              <thead className="bg-term-surface-alt sticky top-0">
                 <tr>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-slate-300">Username</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-slate-300 w-24">Role</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-slate-300 w-36">Created</th>
-                  <th className="px-4 py-2 w-20"></th>
+                  <th className="px-3 py-1.5 text-left text-xs text-term-fg-dim font-normal">Username</th>
+                  <th className="px-3 py-1.5 text-left text-xs text-term-fg-dim font-normal w-24">Role</th>
+                  <th className="px-3 py-1.5 text-left text-xs text-term-fg-dim font-normal w-20">2FA</th>
+                  <th className="px-3 py-1.5 text-left text-xs text-term-fg-dim font-normal w-36">Created</th>
+                  <th className="px-3 py-1.5 w-24"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-term-border">
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-700/50">
-                    <td className="px-4 py-3">
+                  <tr key={user.id} className="hover:bg-term-surface-alt">
+                    <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-white">{user.username}</span>
+                        <span className="text-term-fg-bright text-xs">{user.username}</span>
                         {user.id === currentUserId && (
-                          <span className="text-xs px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded">
-                            You
+                          <span className="text-xs text-term-cyan">
+                            (you)
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded ${
+                    <td className="px-3 py-2">
+                      <span className={`text-xs font-mono ${
                         user.role === 'admin'
-                          ? 'bg-purple-500/20 text-purple-400'
-                          : 'bg-slate-500/20 text-slate-400'
+                          ? 'text-term-magenta'
+                          : 'text-term-fg-dim'
                       }`}>
-                        {user.role}
+                        {user.role === 'admin' ? '[admin]' : '[user]'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-400 text-sm">
+                    <td className="px-3 py-2">
+                      <span className={`text-xs font-mono ${
+                        user.totp_enabled ? 'text-term-green' : 'text-term-yellow'
+                      }`}>
+                        {user.totp_enabled ? '[2fa]' : '[no 2fa]'}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-term-fg-dim text-xs">
                       {new Date(user.created_at).toLocaleDateString()}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEdit(user)}
-                          className="p-1 text-slate-400 hover:text-white transition-colors"
+                          className="text-xs text-term-fg-dim hover:text-term-cyan font-mono"
                           title="Edit"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
+                          [edit]
                         </button>
                         {user.id !== currentUserId && (
                           <button
                             onClick={() => handleDelete(user)}
-                            className="p-1 text-slate-400 hover:text-red-400 transition-colors"
+                            className="text-xs text-term-fg-dim hover:text-term-red font-mono"
                             title="Delete"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                            [del]
                           </button>
                         )}
                       </div>
@@ -221,82 +223,86 @@ export default function UserManagement({ onClose, currentUserId }: UserManagemen
 
         {/* Add/Edit Form Modal */}
         {showForm && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <div className="bg-slate-700 rounded-lg p-6 w-96">
-              <h3 className="text-lg font-semibold text-white mb-4">
-                {editingUser ? 'Edit User' : 'Add User'}
-              </h3>
+          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+            <div className="border border-term-border bg-term-surface w-96">
+              <div className="px-3 py-1.5 bg-term-surface-alt border-b border-term-border flex items-center justify-between">
+                <span className="text-term-fg-dim text-xs font-mono">
+                  --[ {editingUser ? 'edit user' : 'add user'} ]--
+                </span>
+              </div>
 
-              {formError && (
-                <div className="mb-4 p-2 bg-red-500/10 border border-red-500 rounded text-red-400 text-sm">
-                  {formError}
-                </div>
-              )}
+              <div className="p-4">
+                {formError && (
+                  <div className="mb-4 p-2 border border-term-red text-term-red text-xs">
+                    [ERR] {formError}
+                  </div>
+                )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white"
-                    required
-                    minLength={3}
-                  />
-                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-term-fg-dim text-xs mb-1">
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.username}
+                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                      className="w-full bg-term-black border border-term-border text-term-fg-bright text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan"
+                      required
+                      minLength={3}
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Password {editingUser && <span className="text-slate-500">(leave empty to keep current)</span>}
-                  </label>
-                  <input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white"
-                    required={!editingUser}
-                    minLength={8}
-                  />
-                </div>
+                  <div>
+                    <label className="block text-term-fg-dim text-xs mb-1">
+                      Password {editingUser && <span className="text-term-fg-dim">(leave empty to keep current)</span>}
+                    </label>
+                    <input
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="w-full bg-term-black border border-term-border text-term-fg-bright text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan"
+                      required={!editingUser}
+                      minLength={8}
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Role
-                  </label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value as Role })}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white"
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
+                  <div>
+                    <label className="block text-term-fg-dim text-xs mb-1">
+                      Role
+                    </label>
+                    <select
+                      value={formData.role}
+                      onChange={(e) => setFormData({ ...formData, role: e.target.value as Role })}
+                      className="w-full bg-term-black border border-term-border text-term-fg-bright text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan"
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
 
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowForm(false);
-                      setEditingUser(null);
-                    }}
-                    className="px-4 py-2 text-slate-300 hover:text-white"
-                    disabled={saving}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded disabled:opacity-50"
-                    disabled={saving}
-                  >
-                    {saving ? 'Saving...' : editingUser ? 'Update' : 'Create'}
-                  </button>
-                </div>
-              </form>
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForm(false);
+                        setEditingUser(null);
+                      }}
+                      className="text-term-fg-dim hover:text-term-fg text-xs font-mono"
+                      disabled={saving}
+                    >
+                      [ cancel ]
+                    </button>
+                    <button
+                      type="submit"
+                      className="border border-term-cyan text-term-cyan hover:bg-term-cyan hover:text-term-black text-xs font-mono px-2 py-0.5 disabled:opacity-50"
+                      disabled={saving}
+                    >
+                      {saving ? '[ saving... ]' : editingUser ? '[ update ]' : '[ create ]'}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         )}

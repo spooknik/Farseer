@@ -86,184 +86,218 @@ export default function MachineForm({ machine, onSave, onCancel }: MachineFormPr
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
-            {isEditing ? 'Edit Machine' : 'Add Machine'}
-          </h2>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+      <div className="border border-term-border bg-term-surface max-w-md w-full max-h-[90vh] overflow-y-auto">
+        {/* Title bar */}
+        <div className="px-3 py-1.5 bg-term-surface-alt border-b border-term-border flex items-center justify-between">
+          <span className="text-xs text-term-fg-dim font-mono">
+            {isEditing ? '--[ edit machine ]--' : '--[ add machine ]--'}
+          </span>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={loading}
+            className="text-xs text-term-fg-dim hover:text-term-red transition-colors font-mono"
+          >
+            [x]
+          </button>
+        </div>
 
+        <div className="p-4">
           {error && (
-            <div className="mb-4 bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded">
-              {error}
+            <div className="mb-4 text-term-red text-xs border border-term-red/30 bg-term-red-dim/30 px-3 py-2 font-mono">
+              [ERR] {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">
+              <label className="text-term-fg-dim text-xs mb-1 block font-mono">
                 Name
               </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="My Server"
-                required
-              />
+              <div className="flex items-center gap-2">
+                <span className="text-term-cyan text-xs font-mono">&gt;</span>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="flex-1 bg-term-black border border-term-border text-term-fg-bright text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan font-mono"
+                  placeholder="My Server"
+                  required
+                />
+              </div>
             </div>
 
             {groups.length > 0 && (
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
+                <label className="text-term-fg-dim text-xs mb-1 block font-mono">
                   Group
                 </label>
-                <select
-                  value={groupId || ''}
-                  onChange={(e) => setGroupId(e.target.value ? parseInt(e.target.value) : null)}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">No group</option>
-                  {groups.map((group) => (
-                    <option key={group.id} value={group.id}>
-                      {group.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex items-center gap-2">
+                  <span className="text-term-cyan text-xs font-mono">&gt;</span>
+                  <select
+                    value={groupId || ''}
+                    onChange={(e) => setGroupId(e.target.value ? parseInt(e.target.value) : null)}
+                    className="flex-1 bg-term-black border border-term-border text-term-fg text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan font-mono"
+                  >
+                    <option value="">No group</option>
+                    {groups.map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             )}
 
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-300 mb-1">
+                <label className="text-term-fg-dim text-xs mb-1 block font-mono">
                   Hostname
                 </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-term-cyan text-xs font-mono">&gt;</span>
+                  <input
+                    type="text"
+                    value={hostname}
+                    onChange={(e) => setHostname(e.target.value)}
+                    className="flex-1 bg-term-black border border-term-border text-term-fg-bright text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan font-mono"
+                    placeholder="192.168.1.100"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-term-fg-dim text-xs mb-1 block font-mono">
+                  Port
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-term-cyan text-xs font-mono">&gt;</span>
+                  <input
+                    type="number"
+                    value={port}
+                    onChange={(e) => setPort(parseInt(e.target.value) || 22)}
+                    className="flex-1 bg-term-black border border-term-border text-term-fg-bright text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan font-mono"
+                    min={1}
+                    max={65535}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-term-fg-dim text-xs mb-1 block font-mono">
+                Username
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-term-cyan text-xs font-mono">&gt;</span>
                 <input
                   type="text"
-                  value={hostname}
-                  onChange={(e) => setHostname(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="192.168.1.100"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="flex-1 bg-term-black border border-term-border text-term-fg-bright text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan font-mono"
+                  placeholder="root"
                   required
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Port
-                </label>
-                <input
-                  type="number"
-                  value={port}
-                  onChange={(e) => setPort(parseInt(e.target.value) || 22)}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  min={1}
-                  max={65535}
-                />
-              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">
-                Username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="root"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">
+              <label className="text-term-fg-dim text-xs mb-1 block font-mono">
                 Authentication Type
               </label>
-              <div className="flex gap-4">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="password"
-                    checked={authType === 'password'}
-                    onChange={() => setAuthType('password')}
-                    className="mr-2"
-                  />
-                  <span className="text-white">Password</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="key"
-                    checked={authType === 'key'}
-                    onChange={() => setAuthType('key')}
-                    className="mr-2"
-                  />
-                  <span className="text-white">Private Key</span>
-                </label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setAuthType('password')}
+                  className={`text-xs font-mono border px-3 py-1.5 transition-colors ${
+                    authType === 'password'
+                      ? 'border-term-cyan text-term-cyan bg-term-cyan/10'
+                      : 'border-term-border text-term-fg-dim hover:text-term-fg'
+                  }`}
+                >
+                  [password]
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuthType('key')}
+                  className={`text-xs font-mono border px-3 py-1.5 transition-colors ${
+                    authType === 'key'
+                      ? 'border-term-cyan text-term-cyan bg-term-cyan/10'
+                      : 'border-term-border text-term-fg-dim hover:text-term-fg'
+                  }`}
+                >
+                  [private key]
+                </button>
               </div>
             </div>
 
             {authType === 'password' ? (
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Password {isEditing && <span className="text-slate-500">(leave empty to keep current)</span>}
+                <label className="text-term-fg-dim text-xs mb-1 block font-mono">
+                  Password {isEditing && <span className="text-term-fg-dim">(leave empty to keep current)</span>}
                 </label>
-                <input
-                  type="password"
-                  value={credential}
-                  onChange={(e) => setCredential(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter password"
-                  required={!isEditing}
-                />
+                <div className="flex items-center gap-2">
+                  <span className="text-term-cyan text-xs font-mono">&gt;</span>
+                  <input
+                    type="password"
+                    value={credential}
+                    onChange={(e) => setCredential(e.target.value)}
+                    className="flex-1 bg-term-black border border-term-border text-term-fg-bright text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan font-mono"
+                    placeholder="Enter password"
+                    required={!isEditing}
+                  />
+                </div>
               </div>
             ) : (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Private Key {isEditing && <span className="text-slate-500">(leave empty to keep current)</span>}
+                  <label className="text-term-fg-dim text-xs mb-1 block font-mono">
+                    Private Key {isEditing && <span className="text-term-fg-dim">(leave empty to keep current)</span>}
                   </label>
                   <textarea
                     value={credential}
                     onChange={(e) => setCredential(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                    className="w-full bg-term-black border border-term-border text-term-fg text-xs py-2 px-2 focus:outline-none focus:border-term-cyan font-mono"
                     placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
                     rows={6}
                     required={!isEditing}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="text-term-fg-dim text-xs mb-1 block font-mono">
                     Passphrase (optional)
                   </label>
-                  <input
-                    type="password"
-                    value={passphrase}
-                    onChange={(e) => setPassphrase(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter passphrase if key is encrypted"
-                  />
+                  <div className="flex items-center gap-2">
+                    <span className="text-term-cyan text-xs font-mono">&gt;</span>
+                    <input
+                      type="password"
+                      value={passphrase}
+                      onChange={(e) => setPassphrase(e.target.value)}
+                      className="flex-1 bg-term-black border border-term-border text-term-fg-bright text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan font-mono"
+                      placeholder="Enter passphrase if key is encrypted"
+                    />
+                  </div>
                 </div>
               </>
             )}
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-4 border-t border-term-border">
               <button
                 type="button"
                 onClick={onCancel}
-                className="px-4 py-2 text-slate-300 hover:text-white transition-colors"
+                className="text-xs text-term-fg-dim hover:text-term-fg transition-colors font-mono px-3 py-1.5"
                 disabled={loading}
               >
-                Cancel
+                [ cancel ]
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50"
+                className="text-xs border border-term-cyan text-term-cyan hover:bg-term-cyan hover:text-term-black transition-colors font-mono px-3 py-1.5 disabled:opacity-50"
                 disabled={loading}
               >
-                {loading ? 'Saving...' : isEditing ? 'Update' : 'Add Machine'}
+                {loading ? '[ saving... ]' : isEditing ? '[ save ]' : '[ add ]'}
               </button>
             </div>
           </form>

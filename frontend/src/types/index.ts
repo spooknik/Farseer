@@ -4,6 +4,7 @@ export interface User {
   id: number;
   username: string;
   role: Role;
+  totp_enabled: boolean;
   created_at: string;
 }
 
@@ -55,6 +56,18 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface LoginResponse {
+  // Full auth (returned after TOTP verification)
+  token?: string;
+  user?: User;
+  // Partial auth (needs TOTP)
+  requires_totp?: boolean;
+  requires_totp_setup?: boolean;
+  temp_token?: string;
+  totp_secret?: string;
+  totp_qr_url?: string;
+}
+
 export interface SetupStatus {
   setup_complete: boolean;
 }
@@ -95,7 +108,8 @@ export type AuditAction =
   | 'machine_delete'
   | 'user_create'
   | 'user_update'
-  | 'user_delete';
+  | 'user_delete'
+  | 'totp_setup';
 
 export interface AuditLog {
   id: number;
@@ -114,4 +128,8 @@ export interface AuditLogResponse {
   total: number;
   page: number;
   limit: number;
+}
+
+export interface AppSettings {
+  session_duration_hours: number;
 }

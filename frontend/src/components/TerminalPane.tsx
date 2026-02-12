@@ -89,30 +89,30 @@ export default function TerminalPane({
     const term = new XTerm({
       cursorBlink: true,
       fontSize: 14,
-      fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+      fontFamily: '"JetBrains Mono", "Cascadia Code", "Fira Code", "SF Mono", Menlo, Monaco, "Courier New", monospace',
       allowProposedApi: true,
       theme: {
-        background: '#0f172a',
-        foreground: '#e2e8f0',
-        cursor: '#e2e8f0',
-        cursorAccent: '#0f172a',
-        selectionBackground: 'rgba(59, 130, 246, 0.3)',
-        black: '#1e293b',
-        red: '#ef4444',
-        green: '#22c55e',
-        yellow: '#eab308',
-        blue: '#3b82f6',
-        magenta: '#a855f7',
-        cyan: '#06b6d4',
-        white: '#e2e8f0',
-        brightBlack: '#475569',
-        brightRed: '#f87171',
-        brightGreen: '#4ade80',
-        brightYellow: '#facc15',
-        brightBlue: '#60a5fa',
-        brightMagenta: '#c084fc',
-        brightCyan: '#22d3ee',
-        brightWhite: '#f8fafc',
+        background: '#0a0e14',
+        foreground: '#b0bec5',
+        cursor: '#56d4c8',
+        cursorAccent: '#0a0e14',
+        selectionBackground: 'rgba(86, 212, 200, 0.2)',
+        black: '#0a0e14',
+        red: '#ff5c57',
+        green: '#5af78e',
+        yellow: '#f3f99d',
+        blue: '#57c7ff',
+        magenta: '#ff6ac1',
+        cyan: '#56d4c8',
+        white: '#b0bec5',
+        brightBlack: '#5c6a77',
+        brightRed: '#ff8a84',
+        brightGreen: '#83f9b2',
+        brightYellow: '#f8fcc4',
+        brightBlue: '#83d6ff',
+        brightMagenta: '#ff94d8',
+        brightCyan: '#7edfda',
+        brightWhite: '#e0e6ed',
       },
     });
 
@@ -383,22 +383,28 @@ export default function TerminalPane({
 
   return (
     <div
-      className={`h-full flex flex-col bg-slate-900 ${isFocused ? 'ring-2 ring-blue-500 ring-inset' : ''}`}
+      className={`h-full flex flex-col bg-term-black ${isFocused ? 'border-l-2 border-l-term-cyan' : ''}`}
       onClick={onFocus}
     >
       {/* Header */}
       {showHeader && (
-        <div className="flex items-center justify-between px-3 py-1.5 bg-slate-800 border-b border-slate-700">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-              status === 'connected' ? 'bg-green-500' :
-              status === 'connecting' ? 'bg-yellow-500 animate-pulse' :
-              status === 'error' ? 'bg-red-500' :
-              'bg-slate-500'
-            }`} />
-            <span className="text-slate-300 text-sm truncate">
-              {machine.name} - {machine.username}@{machine.hostname}
+        <div className={`flex items-center justify-between px-3 py-1 bg-term-surface-alt border-b ${isFocused ? 'border-term-cyan' : 'border-term-border'}`}>
+          <div className="flex items-center gap-2 text-xs min-w-0">
+            <span className={`flex-shrink-0 ${
+              status === 'connected' ? 'text-term-green' :
+              status === 'connecting' ? 'text-term-yellow animate-pulse' :
+              status === 'error' ? 'text-term-red' :
+              'text-term-fg-dim'
+            }`}>
+              {status === 'connected' ? '*' :
+               status === 'connecting' ? '~' :
+               status === 'error' ? '!' : '-'}
             </span>
+            <span className={isFocused ? 'text-term-fg-bright' : 'text-term-fg-dim'}>
+              {machine.username}@{machine.hostname}
+            </span>
+            <span className="text-term-fg-muted">::</span>
+            <span className="text-term-fg truncate">{machine.name}</span>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             {(status === 'disconnected' || status === 'error') && (
@@ -407,12 +413,10 @@ export default function TerminalPane({
                   e.stopPropagation();
                   handleReconnect();
                 }}
-                className="p-1 text-slate-400 hover:text-white transition-colors"
+                className="text-xs text-term-fg-dim hover:text-term-cyan transition-colors"
                 title="Reconnect"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+                [retry]
               </button>
             )}
             {canSplit && (
@@ -421,51 +425,47 @@ export default function TerminalPane({
                   {onSplitVertical && (
                     <button
                       onClick={(e) => handleSplitClick('vertical', e)}
-                      className={`p-1 transition-colors ${splitDropdown === 'vertical' ? 'text-white bg-slate-600 rounded' : 'text-slate-400 hover:text-white'}`}
+                      className={`text-xs transition-colors ${splitDropdown === 'vertical' ? 'text-term-cyan' : 'text-term-fg-dim hover:text-term-fg'}`}
                       title="Split Vertical"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m-8-8h16" />
-                      </svg>
+                      [|]
                     </button>
                   )}
                   {onSplitHorizontal && (
                     <button
                       onClick={(e) => handleSplitClick('horizontal', e)}
-                      className={`p-1 transition-colors ${splitDropdown === 'horizontal' ? 'text-white bg-slate-600 rounded' : 'text-slate-400 hover:text-white'}`}
+                      className={`text-xs transition-colors ${splitDropdown === 'horizontal' ? 'text-term-cyan' : 'text-term-fg-dim hover:text-term-fg'}`}
                       title="Split Horizontal"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12h16" />
-                      </svg>
+                      [-]
                     </button>
                   )}
                 </div>
-                
+
                 {/* Machine selection dropdown */}
                 {splitDropdown && (
-                  <div className="absolute right-0 top-full mt-1 w-56 bg-slate-700 border border-slate-600 rounded-md shadow-lg z-50 py-1 max-h-64 overflow-y-auto">
+                  <div className="absolute right-0 top-full mt-1 w-56 bg-term-surface border border-term-border z-50 py-1 max-h-64 overflow-y-auto">
                     <button
                       onClick={() => handleSelectMachine(machine, splitDropdown)}
-                      className="w-full px-3 py-2 text-left text-sm hover:bg-slate-600 transition-colors flex items-center gap-2"
+                      className="w-full px-3 py-1.5 text-left text-xs hover:bg-term-surface-alt transition-colors flex items-center gap-2"
                     >
-                      <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                      <span className="text-white font-medium">Same machine</span>
-                      <span className="text-slate-400 text-xs truncate ml-auto">{machine.name}</span>
+                      <span className="text-term-cyan flex-shrink-0">*</span>
+                      <span className="text-term-fg-bright">same machine</span>
+                      <span className="text-term-fg-dim truncate ml-auto">{machine.name}</span>
                     </button>
                     {availableMachines.length > 0 && (
                       <>
-                        <div className="border-t border-slate-600 my-1" />
+                        <div className="border-t border-term-border my-1" />
                         {availableMachines
                           .filter(m => m.id !== machine.id)
                           .map((m) => (
                             <button
                               key={m.id}
                               onClick={() => handleSelectMachine(m, splitDropdown)}
-                              className="w-full px-3 py-2 text-left text-sm hover:bg-slate-600 transition-colors"
+                              className="w-full px-3 py-1.5 text-left text-xs hover:bg-term-surface-alt transition-colors"
                             >
-                              <div className="text-white truncate">{m.name}</div>
-                              <div className="text-slate-400 text-xs truncate">{m.username}@{m.hostname}</div>
+                              <div className="text-term-fg truncate">{m.name}</div>
+                              <div className="text-term-fg-dim truncate">{m.username}@{m.hostname}</div>
                             </button>
                           ))}
                       </>
@@ -480,12 +480,10 @@ export default function TerminalPane({
                   e.stopPropagation();
                   onClose?.();
                 }}
-                className="p-1 text-slate-400 hover:text-red-400 transition-colors"
+                className="text-xs text-term-fg-dim hover:text-term-red transition-colors"
                 title="Close Pane"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                [x]
               </button>
             )}
           </div>
@@ -498,75 +496,65 @@ export default function TerminalPane({
       {/* Host Key Verification Modal */}
       {hostKeyPrompt && (
         <div className="absolute inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 rounded-lg max-w-lg w-full p-6 shadow-xl">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="border border-term-border bg-term-surface max-w-lg w-full flex flex-col">
+            <div className="flex items-center justify-between px-3 py-1.5 bg-term-surface-alt border-b border-term-border">
+              <span className="text-xs text-term-fg-dim">
+                --[ <span className={hostKeyPrompt.status === 'new' ? 'text-term-yellow' : 'text-term-red'}>
+                  {hostKeyPrompt.status === 'new' ? 'new host key' : 'host key changed'}
+                </span> ]--
+              </span>
+            </div>
+
+            <div className="p-4">
               {hostKeyPrompt.status === 'new' ? (
-                <div className="p-2 bg-yellow-500/20 rounded-full">
-                  <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                </div>
+                <p className="text-term-fg text-xs mb-4">
+                  First connection to <span className="text-term-fg-bright">{machine.hostname}</span>.
+                  Verify the fingerprint matches what you expect.
+                </p>
               ) : (
-                <div className="p-2 bg-red-500/20 rounded-full">
-                  <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
+                <div className="mb-4">
+                  <p className="text-term-red text-xs mb-2">
+                    [WARN] The host key for this server has changed!
+                  </p>
+                  <p className="text-term-fg-dim text-xs">
+                    This could indicate a MITM attack or server reinstallation.
+                  </p>
                 </div>
               )}
-              <h3 className="text-lg font-semibold text-white">
-                {hostKeyPrompt.status === 'new' ? 'New Host Key' : 'Host Key Changed!'}
-              </h3>
-            </div>
 
-            {hostKeyPrompt.status === 'new' ? (
-              <p className="text-slate-300 mb-4">
-                This is the first time connecting to <span className="font-mono text-white">{machine.hostname}</span>.
-                Please verify the host key fingerprint matches what you expect.
-              </p>
-            ) : (
-              <div className="mb-4">
-                <p className="text-red-400 font-medium mb-2">
-                  Warning: The host key for this server has changed!
-                </p>
-                <p className="text-slate-300 text-sm">
-                  This could indicate a man-in-the-middle attack, or the server may have been reinstalled.
-                  Only proceed if you trust this change.
-                </p>
+              <div className="bg-term-black border border-term-border p-3 mb-4">
+                <div className="text-xs text-term-fg-dim mb-1">fingerprint (SHA256)</div>
+                <div className="text-xs text-term-green break-all">
+                  {hostKeyPrompt.fingerprint}
+                </div>
+                {hostKeyPrompt.status === 'mismatch' && hostKeyPrompt.stored_key && (
+                  <>
+                    <div className="text-xs text-term-fg-dim mt-3 mb-1">previously stored</div>
+                    <div className="text-xs text-term-red break-all">
+                      {hostKeyPrompt.stored_key}
+                    </div>
+                  </>
+                )}
               </div>
-            )}
 
-            <div className="bg-slate-900 rounded p-3 mb-4">
-              <div className="text-xs text-slate-500 mb-1">Server Fingerprint (SHA256)</div>
-              <div className="font-mono text-sm text-green-400 break-all">
-                {hostKeyPrompt.fingerprint}
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => handleHostKeyResponse(false)}
+                  className="px-3 py-1.5 text-xs text-term-fg-dim hover:text-term-fg transition-colors"
+                >
+                  [ reject ]
+                </button>
+                <button
+                  onClick={() => handleHostKeyResponse(true)}
+                  className={`px-3 py-1.5 text-xs border transition-colors ${
+                    hostKeyPrompt.status === 'new'
+                      ? 'border-term-cyan text-term-cyan hover:bg-term-cyan hover:text-term-black'
+                      : 'border-term-red text-term-red hover:bg-term-red hover:text-term-black'
+                  }`}
+                >
+                  [ {hostKeyPrompt.status === 'new' ? 'accept' : 'accept anyway'} ]
+                </button>
               </div>
-              {hostKeyPrompt.status === 'mismatch' && hostKeyPrompt.stored_key && (
-                <>
-                  <div className="text-xs text-slate-500 mt-3 mb-1">Previously Stored Fingerprint</div>
-                  <div className="font-mono text-sm text-red-400 break-all">
-                    {hostKeyPrompt.stored_key}
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => handleHostKeyResponse(false)}
-                className="px-4 py-2 text-slate-300 hover:text-white transition-colors"
-              >
-                Reject
-              </button>
-              <button
-                onClick={() => handleHostKeyResponse(true)}
-                className={`px-4 py-2 rounded font-medium transition-colors ${
-                  hostKeyPrompt.status === 'new'
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-red-600 hover:bg-red-700 text-white'
-                }`}
-              >
-                {hostKeyPrompt.status === 'new' ? 'Accept & Connect' : 'Accept Anyway'}
-              </button>
             </div>
           </div>
         </div>

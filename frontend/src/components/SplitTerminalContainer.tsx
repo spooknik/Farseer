@@ -446,7 +446,7 @@ export default function SplitTerminalContainer({ machine, availableMachines, onS
       {dividerLayouts.map((divider) => (
         <div
           key={divider.id}
-          className="absolute bg-slate-700 z-10"
+          className="absolute bg-term-border hover:bg-term-cyan transition-colors z-10"
           style={
             divider.direction === 'vertical'
               ? {

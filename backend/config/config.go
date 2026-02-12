@@ -10,11 +10,12 @@ import (
 )
 
 type Config struct {
-	ServerPort   string `json:"server_port"`
-	DatabasePath string `json:"database_path"`
-	ServerSecret string `json:"server_secret"`
-	JWTSecret    string `json:"jwt_secret"`
-	Production   bool   `json:"production"`
+	ServerPort           string `json:"server_port"`
+	DatabasePath         string `json:"database_path"`
+	ServerSecret         string `json:"server_secret"`
+	JWTSecret            string `json:"jwt_secret"`
+	Production           bool   `json:"production"`
+	SessionDurationHours int    `json:"session_duration_hours"`
 }
 
 var (
@@ -60,6 +61,11 @@ func GetConfig() *Config {
 			if err := json.Unmarshal(data, instance); err != nil {
 				// Config file is corrupted, will use defaults
 			}
+		}
+
+		// Set defaults
+		if instance.SessionDurationHours == 0 {
+			instance.SessionDurationHours = 24
 		}
 
 		// Generate secrets if not set

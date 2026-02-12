@@ -160,54 +160,48 @@ export default function FileManager({ machine, onClose }: FileManagerProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-800 rounded-lg w-full max-w-4xl h-[80vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h2 className="text-xl font-semibold text-white">
-            File Manager - {machine.name}
-          </h2>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+      <div className="border border-term-border bg-term-surface w-full max-w-4xl h-[80vh] flex flex-col">
+        {/* Title bar */}
+        <div className="flex items-center justify-between px-3 py-1.5 bg-term-surface-alt border-b border-term-border">
+          <span className="text-xs text-term-fg-dim font-mono">
+            --[ sftp :: {machine.name} ]--
+          </span>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="text-xs text-term-fg-dim hover:text-term-red font-mono transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            [x]
           </button>
         </div>
 
-        {/* Toolbar */}
-        <div className="flex items-center gap-2 p-4 border-b border-slate-700">
+        {/* Toolbar / Path bar */}
+        <div className="flex items-center gap-2 px-3 py-1.5 border-b border-term-border">
           <button
             onClick={handleGoUp}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
+            className="text-xs text-term-fg-dim hover:text-term-fg font-mono transition-colors"
             title="Go up"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-            </svg>
+            [..]
           </button>
           <button
             onClick={() => fetchDirectory(currentPath)}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
+            className="text-xs text-term-fg-dim hover:text-term-fg font-mono transition-colors"
             title="Refresh"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            [r]
           </button>
-          <div className="flex-1 px-3 py-1 bg-slate-700 rounded text-slate-300 text-sm truncate">
-            {currentPath || '/'}
+          <div className="flex-1 px-2 py-0.5 bg-term-surface-alt border border-term-border text-term-fg text-xs font-mono truncate">
+            <span className="text-term-cyan">$ </span>{currentPath || '/'}
           </div>
           <button
             onClick={() => setShowNewFolderDialog(true)}
-            className="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 text-white rounded transition-colors"
+            className="text-xs text-term-fg-dim hover:text-term-fg font-mono border border-term-border px-2 py-0.5 transition-colors"
           >
-            New Folder
+            [mkdir]
           </button>
-          <label className={`px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded cursor-pointer transition-colors ${uploadProgress ? 'opacity-50 pointer-events-none' : ''}`}>
-            {uploadProgress ? 'Uploading...' : 'Upload'}
+          <label className={`text-xs text-term-fg font-mono border border-term-cyan px-2 py-0.5 cursor-pointer hover:bg-term-cyan/10 transition-colors ${uploadProgress ? 'opacity-50 pointer-events-none' : ''}`}>
+            {uploadProgress ? '[uploading...]' : '[upload]'}
             <input
               ref={fileInputRef}
               type="file"
@@ -221,18 +215,14 @@ export default function FileManager({ machine, onClose }: FileManagerProps) {
 
         {/* Upload progress bar */}
         {uploadProgress && (
-          <div className="px-4 py-2 border-b border-slate-700">
-            <div className="flex items-center gap-2 text-sm text-slate-300 mb-1">
-              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              <span className="truncate">Uploading: {uploadProgress.name}</span>
+          <div className="px-3 py-1.5 border-b border-term-border">
+            <div className="flex items-center gap-2 text-xs text-term-fg-dim font-mono mb-1">
+              <span className="truncate">uploading: {uploadProgress.name}</span>
               <span className="ml-auto">{uploadProgress.percent}%</span>
             </div>
-            <div className="w-full bg-slate-700 rounded-full h-1.5">
+            <div className="w-full bg-term-surface-alt h-1">
               <div
-                className="bg-blue-500 h-1.5 rounded-full transition-all duration-200"
+                className="bg-term-cyan h-1 transition-all duration-200"
                 style={{ width: `${uploadProgress.percent}%` }}
               />
             </div>
@@ -242,75 +232,71 @@ export default function FileManager({ machine, onClose }: FileManagerProps) {
         {/* File list */}
         <div className="flex-1 overflow-auto">
           {loading ? (
-            <div className="flex items-center justify-center h-full text-slate-400">
-              Loading...
+            <div className="flex items-center justify-center h-full text-term-fg-dim text-xs font-mono">
+              loading...
             </div>
           ) : error ? (
-            <div className="flex items-center justify-center h-full text-red-400">
-              {error}
+            <div className="flex items-center justify-center h-full text-term-red text-xs font-mono">
+              [ERR] {error}
             </div>
           ) : files.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-slate-400">
-              Empty directory
+            <div className="flex items-center justify-center h-full text-term-fg-dim text-xs font-mono">
+              empty directory
             </div>
           ) : (
             <table className="w-full">
-              <thead className="bg-slate-700/50 sticky top-0">
+              <thead className="bg-term-surface-alt sticky top-0">
                 <tr>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-slate-300">Name</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-slate-300 w-24">Size</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-slate-300 w-44">Modified</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-slate-300 w-24">Mode</th>
-                  <th className="px-4 py-2 w-20"></th>
+                  <th className="px-3 py-1.5 text-left text-xs font-normal text-term-fg-dim border-b border-term-border font-mono">name</th>
+                  <th className="px-3 py-1.5 text-left text-xs font-normal text-term-fg-dim border-b border-term-border font-mono w-24">size</th>
+                  <th className="px-3 py-1.5 text-left text-xs font-normal text-term-fg-dim border-b border-term-border font-mono w-44">modified</th>
+                  <th className="px-3 py-1.5 text-left text-xs font-normal text-term-fg-dim border-b border-term-border font-mono w-24">mode</th>
+                  <th className="px-3 py-1.5 border-b border-term-border w-20"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-term-border">
                 {files.map((file) => (
                   <tr
                     key={file.path}
-                    className={`hover:bg-slate-700/50 cursor-pointer ${
-                      selectedFiles.has(file.path) ? 'bg-blue-500/20' : ''
+                    className={`hover:bg-term-surface-alt cursor-pointer ${
+                      selectedFiles.has(file.path) ? 'bg-term-cyan/10' : ''
                     }`}
                     onClick={() => toggleSelect(file.path)}
                     onDoubleClick={() => handleNavigate(file)}
                   >
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-2">
+                    <td className="px-3 py-1.5">
+                      <div className="flex items-center gap-2 font-mono text-xs">
                         {file.is_dir ? (
-                          <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                          </svg>
+                          <span className="text-term-cyan">d</span>
                         ) : (
-                          <svg className="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                          </svg>
+                          <span className="text-term-fg-dim">-</span>
                         )}
-                        <span className="text-white truncate">{file.name}</span>
+                        <span className={file.is_dir ? 'text-term-cyan truncate' : 'text-term-fg truncate'}>
+                          {file.name}{file.is_dir ? '/' : ''}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-4 py-2 text-slate-400 text-sm">
+                    <td className="px-3 py-1.5 text-term-fg-dim text-xs font-mono">
                       {file.is_dir ? '-' : formatFileSize(file.size)}
                     </td>
-                    <td className="px-4 py-2 text-slate-400 text-sm">
+                    <td className="px-3 py-1.5 text-term-fg-dim text-xs font-mono">
                       {formatDate(file.mod_time)}
                     </td>
-                    <td className="px-4 py-2 text-slate-400 text-sm font-mono">
+                    <td className="px-3 py-1.5 text-term-fg-dim text-xs font-mono">
                       {file.mode}
                     </td>
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-1">
+                    <td className="px-3 py-1.5">
+                      <div className="flex items-center gap-1 font-mono">
                         {!file.is_dir && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDownload(file);
                             }}
-                            className="p-1 text-slate-400 hover:text-white transition-colors"
+                            className="text-xs text-term-fg-dim hover:text-term-fg transition-colors"
                             title="Download"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
+                            [dl]
                           </button>
                         )}
                         <button
@@ -318,12 +304,10 @@ export default function FileManager({ machine, onClose }: FileManagerProps) {
                             e.stopPropagation();
                             handleDelete(file);
                           }}
-                          className="p-1 text-slate-400 hover:text-red-400 transition-colors"
+                          className="text-xs text-term-fg-dim hover:text-term-red transition-colors"
                           title="Delete"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                          [x]
                         </button>
                       </div>
                     </td>
@@ -336,34 +320,44 @@ export default function FileManager({ machine, onClose }: FileManagerProps) {
 
         {/* New folder dialog */}
         {showNewFolderDialog && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <div className="bg-slate-700 rounded-lg p-4 w-80">
-              <h3 className="text-white font-medium mb-4">New Folder</h3>
-              <input
-                type="text"
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white mb-4"
-                placeholder="Folder name"
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleCreateFolder();
-                  if (e.key === 'Escape') setShowNewFolderDialog(false);
-                }}
-              />
-              <div className="flex justify-end gap-2">
+          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+            <div className="border border-term-border bg-term-surface w-80">
+              <div className="px-3 py-1.5 bg-term-surface-alt border-b border-term-border flex items-center justify-between">
+                <span className="text-xs text-term-fg-dim font-mono">--[ mkdir ]--</span>
                 <button
                   onClick={() => setShowNewFolderDialog(false)}
-                  className="px-3 py-1.5 text-slate-300 hover:text-white"
+                  className="text-xs text-term-fg-dim hover:text-term-red font-mono transition-colors"
                 >
-                  Cancel
+                  [x]
                 </button>
-                <button
-                  onClick={handleCreateFolder}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded"
-                >
-                  Create
-                </button>
+              </div>
+              <div className="p-3">
+                <input
+                  type="text"
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  className="w-full px-2 py-1 bg-term-surface-alt border border-term-border text-term-fg text-xs font-mono mb-3 focus:outline-none focus:border-term-cyan"
+                  placeholder="folder name"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleCreateFolder();
+                    if (e.key === 'Escape') setShowNewFolderDialog(false);
+                  }}
+                />
+                <div className="flex justify-end gap-2 font-mono">
+                  <button
+                    onClick={() => setShowNewFolderDialog(false)}
+                    className="text-xs text-term-fg-dim hover:text-term-fg transition-colors"
+                  >
+                    [ cancel ]
+                  </button>
+                  <button
+                    onClick={handleCreateFolder}
+                    className="text-xs text-term-fg border border-term-cyan px-2 py-0.5 hover:bg-term-cyan/10 transition-colors"
+                  >
+                    [ create ]
+                  </button>
+                </div>
               </div>
             </div>
           </div>

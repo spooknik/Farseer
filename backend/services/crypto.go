@@ -129,3 +129,73 @@ func DecryptCredential(encryptedBytes []byte, userPassword string) (*CredentialD
 
 	return &data, nil
 }
+
+// EncryptTOTPSecret encrypts a TOTP secret using AES-256-GCM with the server secret
+func EncryptTOTPSecret(secret string, serverSecret string) (string, error) {
+	salt := make([]byte, saltLength)
+	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+		return "", err
+	}
+
+	key := pbkdf2.Key([]byte(serverSecret), salt, iterations, keyLength, sha256.New)
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		return "", err
+	}
+
+	ciphertext := gcm.Seal(nil, nonce, []byte(secret), nil)
+
+	encData := EncryptedData{
+		Salt:       salt,
+		Nonce:      nonce,
+		Ciphertext: ciphertext,
+	}
+
+	result, err := json.Marshal(encData)
+	if err != nil {
+		return "", err
+	}
+	return string(result), nil
+}
+
+// DecryptTOTPSecret decrypts a TOTP secret
+func DecryptTOTPSecret(encrypted string, serverSecret string) (string, error) {
+	var encData EncryptedData
+	if err := json.Unmarshal([]byte(encrypted), &encData); err != nil {
+		return "", err
+	}
+
+	key := pbkdf2.Key([]byte(serverSecret), encData.Salt, iterations, keyLength, sha256.New)
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	if len(encData.Nonce) != gcm.NonceSize() {
+		return "", errors.New("invalid nonce size")
+	}
+
+	plaintext, err := gcm.Open(nil, encData.Nonce, encData.Ciphertext, nil)
+	if err != nil {
+		return "", errors.New("decryption failed")
+	}
+
+	return string(plaintext), nil
+}

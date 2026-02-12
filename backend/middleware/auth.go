@@ -12,50 +12,79 @@ type Claims struct {
 	UserID   uint   `json:"user_id"`
 	Username string `json:"username"`
 	Role     string `json:"role"`
+	TempAuth bool   `json:"temp_auth,omitempty"`
 	jwt.RegisteredClaims
 }
 
+// parseClaims extracts and validates JWT claims from the Authorization header
+func parseClaims(c *fiber.Ctx) (*Claims, error) {
+	cfg := config.GetConfig()
+
+	authHeader := c.Get("Authorization")
+	if authHeader == "" {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "Missing authorization header")
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "Invalid authorization header format")
+	}
+
+	token, err := jwt.ParseWithClaims(parts[1], &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(cfg.JWTSecret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "Invalid or expired token")
+	}
+
+	claims, ok := token.Claims.(*Claims)
+	if !ok {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "Invalid token claims")
+	}
+
+	return claims, nil
+}
+
+// AuthRequired validates a full (non-temp) JWT token
 func AuthRequired() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		cfg := config.GetConfig()
+		claims, err := parseClaims(c)
+		if err != nil {
+			e := err.(*fiber.Error)
+			return c.Status(e.Code).JSON(fiber.Map{"error": e.Message})
+		}
 
-		// Get token from Authorization header
-		authHeader := c.Get("Authorization")
-		if authHeader == "" {
+		// Reject temp auth tokens — they can only be used for TOTP verification
+		if claims.TempAuth {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Missing authorization header",
+				"error": "TOTP verification required",
 			})
 		}
 
-		// Extract token from "Bearer <token>"
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
+		c.Locals("userID", claims.UserID)
+		c.Locals("username", claims.Username)
+		c.Locals("role", claims.Role)
+
+		return c.Next()
+	}
+}
+
+// TempAuthRequired validates a temp JWT token (used only for TOTP verification)
+func TempAuthRequired() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		claims, err := parseClaims(c)
+		if err != nil {
+			e := err.(*fiber.Error)
+			return c.Status(e.Code).JSON(fiber.Map{"error": e.Message})
+		}
+
+		if !claims.TempAuth {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid authorization header format",
+				"error": "Temporary token required",
 			})
 		}
 
-		tokenString := parts[1]
-
-		// Parse and validate token
-		token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-			return []byte(cfg.JWTSecret), nil
-		})
-
-		if err != nil || !token.Valid {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid or expired token",
-			})
-		}
-
-		claims, ok := token.Claims.(*Claims)
-		if !ok {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid token claims",
-			})
-		}
-
-		// Store user info in context
 		c.Locals("userID", claims.UserID)
 		c.Locals("username", claims.Username)
 		c.Locals("role", claims.Role)

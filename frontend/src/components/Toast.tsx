@@ -84,51 +84,35 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
     setTimeout(() => onRemove(toast.id), 200);
   };
 
-  const iconByType: Record<ToastType, ReactNode> = {
-    success: (
-      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-      </svg>
-    ),
-    error: (
-      <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    ),
-    warning: (
-      <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-    ),
-    info: (
-      <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+  const prefixByType: Record<ToastType, { text: string; color: string }> = {
+    success: { text: '[OK]', color: 'text-term-green' },
+    error: { text: '[ERR]', color: 'text-term-red' },
+    warning: { text: '[WARN]', color: 'text-term-yellow' },
+    info: { text: '[INFO]', color: 'text-term-blue' },
   };
 
-  const bgByType: Record<ToastType, string> = {
-    success: 'bg-green-900/90 border-green-700',
-    error: 'bg-red-900/90 border-red-700',
-    warning: 'bg-yellow-900/90 border-yellow-700',
-    info: 'bg-slate-800/90 border-slate-600',
+  const borderByType: Record<ToastType, string> = {
+    success: 'border-term-green',
+    error: 'border-term-red',
+    warning: 'border-term-yellow',
+    info: 'border-term-border',
   };
+
+  const prefix = prefixByType[toast.type];
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg backdrop-blur-sm pointer-events-auto min-w-[280px] max-w-[400px] transition-all duration-200 ${
-        bgByType[toast.type]
+      className={`flex items-center gap-2 px-3 py-2 border bg-term-surface text-xs pointer-events-auto min-w-[280px] max-w-[400px] transition-all duration-200 ${
+        borderByType[toast.type]
       } ${isExiting ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'}`}
     >
-      <div className="flex-shrink-0">{iconByType[toast.type]}</div>
-      <span className="text-white text-sm flex-1">{toast.message}</span>
+      <span className={`flex-shrink-0 ${prefix.color}`}>{prefix.text}</span>
+      <span className="text-term-fg flex-1">{toast.message}</span>
       <button
         onClick={handleClose}
-        className="flex-shrink-0 text-slate-400 hover:text-white transition-colors"
+        className="flex-shrink-0 text-term-fg-dim hover:text-term-fg-bright transition-colors"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        [x]
       </button>
     </div>
   );

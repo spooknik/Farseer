@@ -7,9 +7,18 @@ import SplitTerminalContainer from './components/SplitTerminalContainer';
 import FileManager from './components/FileManager';
 import UserManagement from './components/UserManagement';
 import AuditLogs from './components/AuditLogs';
+import Settings from './components/Settings';
 import type { Machine, User } from './types';
 import { getCurrentUser, listMachines } from './services/api';
 import { useKeyboardShortcuts, formatShortcut, type KeyboardShortcut } from './hooks/useKeyboardShortcuts';
+
+const FARSEER_LOGO = `
+ ███████╗ █████╗ ██████╗ ███████╗███████╗███████╗██████╗
+ ██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝██╔══██╗
+ █████╗  ███████║██████╔╝███████╗█████╗  █████╗  ██████╔╝
+ ██╔══╝  ██╔══██║██╔══██╗╚════██║██╔══╝  ██╔══╝  ██╔══██╗
+ ██║     ██║  ██║██║  ██║███████║███████╗███████╗██║  ██║
+ ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝`;
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -22,6 +31,7 @@ function App() {
   const [showFileManager, setShowFileManager] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showAuditLogs, setShowAuditLogs] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [sessionStatuses, setSessionStatuses] = useState<Record<number, 'connecting' | 'connected' | 'disconnected' | 'error'>>({});
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
@@ -220,13 +230,13 @@ function App() {
   ], [handleAddMachine, selectedMachine, handleCloseSession, handleNextTab, handlePrevTab]);
 
   // Only enable shortcuts when authenticated and no modal is open
-  const shortcutsEnabled = isAuthenticated && !showMachineForm && !showFileManager && !showUserManagement && !showAuditLogs;
+  const shortcutsEnabled = isAuthenticated && !showMachineForm && !showFileManager && !showUserManagement && !showAuditLogs && !showSettings;
   useKeyboardShortcuts(shortcuts, { enabled: shortcutsEnabled });
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="text-slate-400">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-term-black">
+        <span className="text-term-fg-dim text-xs">loading<span className="cursor-blink"></span></span>
       </div>
     );
   }
@@ -247,127 +257,141 @@ function App() {
         path="/*"
         element={
           isAuthenticated ? (
-            <div className="h-screen flex bg-slate-900">
-              {/* Sidebar */}
-              <div className="w-72 flex-shrink-0 bg-slate-800 border-r border-slate-700 flex flex-col">
-                <div className="p-4 border-b border-slate-700">
-                  <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-bold text-white">Farseer</h1>
-                    <div className="flex items-center gap-2">
-                      {currentUser?.role === 'admin' && (
-                        <>
-                          <button
-                            onClick={() => setShowAuditLogs(true)}
-                            className="text-slate-400 hover:text-white transition-colors"
-                            title="Audit Logs"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => setShowUserManagement(true)}
-                            className="text-slate-400 hover:text-white transition-colors"
-                            title="Manage Users"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                          </button>
-                        </>
-                      )}
-                      <button
-                        onClick={() => setShowShortcutsHelp(true)}
-                        className="text-slate-400 hover:text-white transition-colors"
-                        title={`Keyboard Shortcuts (${formatShortcut({ key: '/', ctrl: true })})`}
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9h.01M8 12h.01M8 15h.01M12 9h.01M12 12h.01M12 15h.01M16 9h.01M16 12h.01M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={handleLogout}
-                        className="text-slate-400 hover:text-white transition-colors"
-                        title="Logout"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
+            <div className="h-screen flex flex-col bg-term-black">
+              {/* Top header bar */}
+              <div className="flex-shrink-0 flex items-center justify-between px-3 py-1.5 bg-term-surface-alt border-b border-term-border">
+                <pre
+                  className="text-term-cyan leading-none select-none"
+                  style={{ fontSize: '6px' }}
+                >{FARSEER_LOGO}</pre>
+                <div className="flex items-center gap-1">
                   {currentUser && (
-                    <div className="mt-2 flex items-center gap-2 text-sm">
-                      <span className="text-slate-400">{currentUser.username}</span>
-                      <span className={`text-xs px-1.5 py-0.5 rounded ${
-                        currentUser.role === 'admin'
-                          ? 'bg-purple-500/20 text-purple-400'
-                          : 'bg-slate-500/20 text-slate-400'
-                      }`}>
-                        {currentUser.role}
-                      </span>
-                    </div>
+                    <>
+                      <span className="text-term-fg-dim text-xs mr-1">{currentUser.username}</span>
+                      {currentUser.role === 'admin' && (
+                        <span className="text-term-magenta text-xs mr-1">[admin]</span>
+                      )}
+                      <span className="text-term-fg-muted text-xs mr-1">|</span>
+                    </>
                   )}
-                </div>
-                <div className="flex-1 overflow-hidden" key={refreshKey}>
-                  <MachineList
-                    selectedMachine={selectedMachine}
-                    onSelectMachine={handleSelectMachine}
-                    onAddMachine={handleAddMachine}
-                    onEditMachine={handleEditMachine}
-                    openSessions={openSessions}
-                    sessionStatuses={sessionStatuses}
-                  />
+                  {currentUser?.role === 'admin' && (
+                    <>
+                      <button
+                        onClick={() => setShowAuditLogs(true)}
+                        className="px-1.5 py-0.5 text-xs text-term-fg-dim hover:text-term-fg-bright transition-colors"
+                        title="Audit Logs"
+                      >
+                        [log]
+                      </button>
+                      <button
+                        onClick={() => setShowUserManagement(true)}
+                        className="px-1.5 py-0.5 text-xs text-term-fg-dim hover:text-term-fg-bright transition-colors"
+                        title="Manage Users"
+                      >
+                        [usr]
+                      </button>
+                      <button
+                        onClick={() => setShowSettings(true)}
+                        className="px-1.5 py-0.5 text-xs text-term-fg-dim hover:text-term-fg-bright transition-colors"
+                        title="Settings"
+                      >
+                        [cfg]
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => setShowShortcutsHelp(true)}
+                    className="px-1.5 py-0.5 text-xs text-term-fg-dim hover:text-term-fg-bright transition-colors"
+                    title={`Keyboard Shortcuts (${formatShortcut({ key: '/', ctrl: true })})`}
+                  >
+                    [?]
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="px-1.5 py-0.5 text-xs text-term-fg-dim hover:text-term-red transition-colors"
+                    title="Logout"
+                  >
+                    [out]
+                  </button>
                 </div>
               </div>
+
+              {/* Body: sidebar + main content */}
+              <div className="flex-1 flex overflow-hidden">
+                {/* Sidebar */}
+                <div className="w-72 flex-shrink-0 bg-term-surface border-r border-term-border flex flex-col">
+                  <div className="flex-1 overflow-hidden" key={refreshKey}>
+                    <MachineList
+                      selectedMachine={selectedMachine}
+                      onSelectMachine={handleSelectMachine}
+                      onAddMachine={handleAddMachine}
+                      onEditMachine={handleEditMachine}
+                      openSessions={openSessions}
+                      sessionStatuses={sessionStatuses}
+                    />
+                  </div>
+                </div>
 
               {/* Main content */}
               <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Action bar */}
                 {selectedMachine && (
-                  <div className="flex items-center justify-end gap-2 px-4 py-2 bg-slate-800/50 border-b border-slate-700">
+                  <div className="flex items-center justify-between px-3 py-1 bg-term-surface-alt border-b border-term-border">
+                    <span className="text-term-fg-dim text-xs">
+                      session: <span className="text-term-fg">{selectedMachine.name}</span>
+                    </span>
                     <button
                       onClick={() => setShowFileManager(true)}
-                      className="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 text-white rounded transition-colors flex items-center gap-2"
+                      className="text-xs text-term-fg-dim hover:text-term-fg transition-colors"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                      </svg>
-                      Files
+                      [sftp]
                     </button>
                   </div>
                 )}
 
-                {/* Session tabs */}
+                {/* Session tabs — tmux style */}
                 {openSessions.length > 0 && (
-                  <div className="flex items-center bg-slate-800 border-b border-slate-700 overflow-x-auto">
+                  <div className="flex items-center bg-term-surface-alt border-b border-term-border px-1 overflow-x-auto">
+                    <span className="text-term-fg-muted text-xs mr-1 flex-shrink-0">[</span>
                     {openSessions.map((machine, index) => {
+                      const isActive = selectedMachine?.id === machine.id;
+                      const status = sessionStatuses[machine.id];
                       return (
                         <div
                           key={machine.id}
-                          className={`flex items-center gap-2 px-4 py-2 cursor-pointer border-r border-slate-700 min-w-0 ${
-                            selectedMachine?.id === machine.id
-                              ? 'bg-slate-900 text-white'
-                              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                          className={`flex items-center gap-1 px-2 py-1 cursor-pointer text-xs transition-colors ${
+                            isActive ? 'text-term-cyan' : 'text-term-fg-dim hover:text-term-fg'
                           }`}
                           onClick={() => setSelectedMachine(machine)}
                         >
-                          <span className="truncate max-w-32">Tab {index + 1}</span>
+                          <span className="text-term-fg-muted">{index}:</span>
+                          <span className={`truncate max-w-24 ${isActive ? 'text-term-cyan' : ''}`}>
+                            {machine.name}
+                          </span>
+                          {isActive && <span className="text-term-cyan">*</span>}
+                          {status === 'connected' && !isActive && (
+                            <span className="text-term-green text-[10px]">+</span>
+                          )}
+                          {status === 'error' && (
+                            <span className="text-term-red text-[10px]">!</span>
+                          )}
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleCloseSession(machine.id);
                             }}
-                            className="p-0.5 hover:bg-slate-600 rounded flex-shrink-0"
+                            className="text-term-fg-dim hover:text-term-red ml-0.5 transition-colors flex-shrink-0"
                             title="Close session"
                           >
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            [x]
                           </button>
+                          {index < openSessions.length - 1 && (
+                            <span className="text-term-fg-muted ml-1">|</span>
+                          )}
                         </div>
                       );
                     })}
+                    <span className="text-term-fg-muted text-xs ml-1 flex-shrink-0">]</span>
                   </div>
                 )}
 
@@ -388,16 +412,19 @@ function App() {
 
                   {/* Empty state */}
                   {openSessions.length === 0 && (
-                    <div className="h-full flex items-center justify-center text-slate-400">
+                    <div className="h-full flex items-center justify-center">
                       <div className="text-center">
-                        <svg className="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p>Select a machine to connect</p>
+                        <pre className="text-term-fg-muted text-xs leading-relaxed">{`  no active sessions
+
+  select a machine from the sidebar
+  or press Ctrl+Shift+T to add one`}</pre>
+                        <span className="cursor-blink text-term-fg-muted"></span>
                       </div>
                     </div>
                   )}
                 </div>
+              </div>
+
               </div>
 
               {/* Machine form modal */}
@@ -430,78 +457,70 @@ function App() {
                 <AuditLogs onClose={() => setShowAuditLogs(false)} />
               )}
 
+              {/* Settings modal (admin only) */}
+              {showSettings && (
+                <Settings onClose={() => setShowSettings(false)} />
+              )}
+
               {/* Keyboard shortcuts help modal */}
               {showShortcutsHelp && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                  <div className="bg-slate-800 rounded-lg shadow-xl border border-slate-700 p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold text-white">Keyboard Shortcuts</h2>
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                  <div className="border border-term-border bg-term-surface w-full max-w-lg max-h-[80vh] flex flex-col">
+                    {/* Title bar */}
+                    <div className="flex items-center justify-between px-3 py-1.5 bg-term-surface-alt border-b border-term-border">
+                      <span className="text-xs text-term-fg-dim">
+                        --[ <span className="text-term-fg-bright">shortcuts</span> ]--
+                      </span>
                       <button
                         onClick={() => setShowShortcutsHelp(false)}
-                        className="text-slate-400 hover:text-white transition-colors"
+                        className="text-xs text-term-fg-dim hover:text-term-red transition-colors"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        [x]
                       </button>
                     </div>
-                    
-                    {/* Tab Navigation */}
-                    <div className="mb-4">
-                      <h3 className="text-sm font-medium text-slate-400 mb-2">Tab Navigation</h3>
-                      <div className="space-y-2">
-                        {shortcuts.map((shortcut, index) => (
-                          <div key={index} className="flex items-center justify-between">
-                            <span className="text-slate-300 text-sm">{shortcut.description}</span>
-                            <kbd className="px-2 py-1 bg-slate-700 rounded text-xs font-mono text-slate-200">
-                              {formatShortcut(shortcut)}
-                            </kbd>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Split Terminal */}
-                    <div className="mb-4">
-                      <h3 className="text-sm font-medium text-slate-400 mb-2">Split Terminal</h3>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 text-sm">Split pane vertically</span>
-                          <kbd className="px-2 py-1 bg-slate-700 rounded text-xs font-mono text-slate-200">
-                            {formatShortcut({ key: 'D', ctrl: true, shift: true })}
-                          </kbd>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 text-sm">Split pane horizontally</span>
-                          <kbd className="px-2 py-1 bg-slate-700 rounded text-xs font-mono text-slate-200">
-                            {formatShortcut({ key: 'E', ctrl: true, shift: true })}
-                          </kbd>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 text-sm">Close focused pane</span>
-                          <kbd className="px-2 py-1 bg-slate-700 rounded text-xs font-mono text-slate-200">
-                            {formatShortcut({ key: 'X', ctrl: true, shift: true })}
-                          </kbd>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 text-sm">Focus next pane</span>
-                          <kbd className="px-2 py-1 bg-slate-700 rounded text-xs font-mono text-slate-200">
-                            {formatShortcut({ key: 'ArrowRight', ctrl: true, alt: true })}
-                          </kbd>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 text-sm">Focus previous pane</span>
-                          <kbd className="px-2 py-1 bg-slate-700 rounded text-xs font-mono text-slate-200">
-                            {formatShortcut({ key: 'ArrowLeft', ctrl: true, alt: true })}
-                          </kbd>
+
+                    <div className="p-4 overflow-y-auto flex-1">
+                      {/* Tab Navigation */}
+                      <div className="mb-4">
+                        <div className="text-term-fg-dim text-xs tracking-wider uppercase mb-2">-- navigation --</div>
+                        <div className="space-y-1">
+                          {shortcuts.map((shortcut, index) => (
+                            <div key={index} className="flex items-center justify-between py-1">
+                              <span className="text-term-fg text-xs">{shortcut.description}</span>
+                              <kbd className="text-term-cyan text-xs bg-term-black px-2 py-0.5 border border-term-border">
+                                {formatShortcut(shortcut)}
+                              </kbd>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="pt-4 border-t border-slate-700">
-                      <p className="text-xs text-slate-500 text-center">
-                        Press {formatShortcut({ key: '/', ctrl: true })} to toggle this help
-                      </p>
+
+                      {/* Split Terminal */}
+                      <div className="mb-4">
+                        <div className="text-term-fg-dim text-xs tracking-wider uppercase mb-2">-- split terminal --</div>
+                        <div className="space-y-1">
+                          {[
+                            { desc: 'Split pane vertically', shortcut: { key: 'D', ctrl: true, shift: true } },
+                            { desc: 'Split pane horizontally', shortcut: { key: 'E', ctrl: true, shift: true } },
+                            { desc: 'Close focused pane', shortcut: { key: 'X', ctrl: true, shift: true } },
+                            { desc: 'Focus next pane', shortcut: { key: 'ArrowRight', ctrl: true, alt: true } },
+                            { desc: 'Focus previous pane', shortcut: { key: 'ArrowLeft', ctrl: true, alt: true } },
+                          ].map((item, i) => (
+                            <div key={i} className="flex items-center justify-between py-1">
+                              <span className="text-term-fg text-xs">{item.desc}</span>
+                              <kbd className="text-term-cyan text-xs bg-term-black px-2 py-0.5 border border-term-border">
+                                {formatShortcut(item.shortcut)}
+                              </kbd>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-term-border">
+                        <p className="text-xs text-term-fg-muted text-center">
+                          press {formatShortcut({ key: '/', ctrl: true })} to toggle this help
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

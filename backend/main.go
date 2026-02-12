@@ -74,6 +74,9 @@ func main() {
 	api.Post("/setup", authLimiter, handlers.Setup)
 	api.Post("/login", authLimiter, handlers.Login)
 
+	// TOTP verification (uses temp token, rate-limited)
+	api.Post("/login/totp", authLimiter, middleware.TempAuthRequired(), handlers.LoginTOTP)
+
 	// Protected routes
 	protected := api.Group("", middleware.AuthRequired())
 	protected.Get("/user", handlers.GetCurrentUser)
@@ -87,6 +90,10 @@ func main() {
 	users.Post("/", handlers.CreateUser)
 	users.Put("/:id", handlers.UpdateUser)
 	users.Delete("/:id", handlers.DeleteUser)
+
+	// Settings routes (admin only)
+	admin.Get("/settings", handlers.GetSettings)
+	admin.Put("/settings", handlers.UpdateSettings)
 
 	// Audit log routes (admin only)
 	audit := admin.Group("/audit")

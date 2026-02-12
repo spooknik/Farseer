@@ -23,6 +23,7 @@ const (
 	AuditActionUserCreate    AuditAction = "user_create"
 	AuditActionUserUpdate    AuditAction = "user_update"
 	AuditActionUserDelete    AuditAction = "user_delete"
+	AuditActionTOTPSetup     AuditAction = "totp_setup"
 )
 
 type AuditLog struct {

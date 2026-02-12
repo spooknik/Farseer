@@ -23,25 +23,27 @@ const actionLabels: Record<AuditAction, string> = {
   user_create: 'User Create',
   user_update: 'User Update',
   user_delete: 'User Delete',
+  totp_setup: 'TOTP Setup',
 };
 
 const actionColors: Record<string, string> = {
-  login: 'bg-green-500/20 text-green-400',
-  logout: 'bg-gray-500/20 text-gray-400',
-  ssh_connect: 'bg-blue-500/20 text-blue-400',
-  ssh_disconnect: 'bg-blue-500/20 text-blue-400',
-  sftp_list: 'bg-purple-500/20 text-purple-400',
-  sftp_download: 'bg-cyan-500/20 text-cyan-400',
-  sftp_upload: 'bg-cyan-500/20 text-cyan-400',
-  sftp_delete: 'bg-red-500/20 text-red-400',
-  sftp_mkdir: 'bg-purple-500/20 text-purple-400',
-  sftp_rename: 'bg-purple-500/20 text-purple-400',
-  machine_create: 'bg-emerald-500/20 text-emerald-400',
-  machine_update: 'bg-yellow-500/20 text-yellow-400',
-  machine_delete: 'bg-red-500/20 text-red-400',
-  user_create: 'bg-emerald-500/20 text-emerald-400',
-  user_update: 'bg-yellow-500/20 text-yellow-400',
-  user_delete: 'bg-red-500/20 text-red-400',
+  login: 'text-term-green',
+  logout: 'text-term-fg-dim',
+  ssh_connect: 'text-term-cyan',
+  ssh_disconnect: 'text-term-cyan',
+  sftp_list: 'text-term-blue',
+  sftp_download: 'text-term-blue',
+  sftp_upload: 'text-term-blue',
+  sftp_delete: 'text-term-red',
+  sftp_mkdir: 'text-term-blue',
+  sftp_rename: 'text-term-blue',
+  machine_create: 'text-term-green',
+  machine_update: 'text-term-fg-dim',
+  machine_delete: 'text-term-red',
+  user_create: 'text-term-green',
+  user_update: 'text-term-fg-dim',
+  user_delete: 'text-term-red',
+  totp_setup: 'text-term-green',
 };
 
 export default function AuditLogs({ onClose }: Props) {
@@ -106,29 +108,27 @@ export default function AuditLogs({ onClose }: Props) {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h2 className="text-xl font-semibold text-white">Audit Logs</h2>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="border border-term-border bg-term-surface w-full max-w-6xl max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between px-3 py-1.5 bg-term-surface-alt border-b border-term-border">
+          <span className="text-xs text-term-fg-dim font-mono">--[ audit logs ]--</span>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-xs text-term-fg-dim hover:text-term-red font-mono"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            [x]
           </button>
         </div>
 
-        <div className="p-4 border-b border-gray-700 flex items-center gap-4">
-          <label className="text-sm text-gray-400">Filter by action:</label>
+        <div className="px-3 py-2 border-b border-term-border flex items-center gap-4">
+          <label className="text-term-fg-dim text-xs font-mono">Filter by action:</label>
           <select
             value={filterAction}
             onChange={(e) => {
               setFilterAction(e.target.value as AuditAction | '');
               setPage(1);
             }}
-            className="bg-gray-700 text-white rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-term-black border border-term-border text-term-fg text-xs py-1.5 px-2 focus:outline-none focus:border-term-cyan font-mono"
           >
             <option value="">All actions</option>
             {actions.map((action) => (
@@ -137,59 +137,59 @@ export default function AuditLogs({ onClose }: Props) {
               </option>
             ))}
           </select>
-          <span className="text-sm text-gray-400 ml-auto">
+          <span className="text-term-fg-dim text-xs font-mono ml-auto">
             {total} total entries
           </span>
         </div>
 
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto px-3 py-2">
           {error && (
-            <div className="bg-red-500/20 text-red-400 p-3 rounded mb-4">
-              {error}
+            <div className="text-term-red text-xs font-mono border border-term-red/30 px-2 py-1.5 mb-3">
+              ! {error}
             </div>
           )}
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <span className="text-term-fg-dim text-xs font-mono animate-pulse">Loading audit logs..._</span>
             </div>
           ) : logs.length === 0 ? (
-            <div className="text-center text-gray-400 py-12">
-              No audit logs found
+            <div className="text-center text-term-fg-dim text-xs font-mono py-12">
+              -- no audit logs found --
             </div>
           ) : (
-            <table className="w-full text-sm">
+            <table className="w-full text-xs font-mono">
               <thead>
-                <tr className="text-left text-gray-400 border-b border-gray-700">
-                  <th className="pb-3 pr-4">Time</th>
-                  <th className="pb-3 pr-4">User</th>
-                  <th className="pb-3 pr-4">Action</th>
-                  <th className="pb-3 pr-4">Machine</th>
-                  <th className="pb-3 pr-4">Details</th>
-                  <th className="pb-3">IP Address</th>
+                <tr className="text-left bg-term-surface-alt text-term-fg-dim text-xs">
+                  <th className="py-1.5 px-2">Time</th>
+                  <th className="py-1.5 px-2">User</th>
+                  <th className="py-1.5 px-2">Action</th>
+                  <th className="py-1.5 px-2">Machine</th>
+                  <th className="py-1.5 px-2">Details</th>
+                  <th className="py-1.5 px-2">IP Address</th>
                 </tr>
               </thead>
               <tbody>
                 {logs.map((log) => (
-                  <tr key={log.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
-                    <td className="py-3 pr-4 text-gray-300 whitespace-nowrap">
+                  <tr key={log.id} className="border-b border-term-border hover:bg-term-surface-alt">
+                    <td className="py-1.5 px-2 text-term-fg-dim whitespace-nowrap">
                       {formatDate(log.created_at)}
                     </td>
-                    <td className="py-3 pr-4 text-white">
+                    <td className="py-1.5 px-2 text-term-fg">
                       {log.username || `User #${log.user_id}`}
                     </td>
-                    <td className="py-3 pr-4">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${actionColors[log.action] || 'bg-gray-500/20 text-gray-400'}`}>
-                        {actionLabels[log.action] || log.action}
+                    <td className="py-1.5 px-2">
+                      <span className={`text-xs ${actionColors[log.action] || 'text-term-fg-dim'}`}>
+                        [{log.action}]
                       </span>
                     </td>
-                    <td className="py-3 pr-4 text-gray-300">
+                    <td className="py-1.5 px-2 text-term-fg-dim">
                       {log.machine_name || '-'}
                     </td>
-                    <td className="py-3 pr-4 text-gray-400 max-w-xs truncate" title={log.details}>
+                    <td className="py-1.5 px-2 text-term-fg-dim max-w-xs truncate" title={log.details}>
                       {log.details || '-'}
                     </td>
-                    <td className="py-3 text-gray-400 font-mono text-xs">
+                    <td className="py-1.5 px-2 text-term-fg-dim text-xs">
                       {log.ip_address || '-'}
                     </td>
                   </tr>
@@ -200,23 +200,23 @@ export default function AuditLogs({ onClose }: Props) {
         </div>
 
         {totalPages > 1 && (
-          <div className="p-4 border-t border-gray-700 flex items-center justify-between">
+          <div className="px-3 py-2 border-t border-term-border flex items-center justify-between">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-4 py-2 bg-gray-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600 transition-colors"
+              className={`text-xs font-mono ${page === 1 ? 'text-term-fg-muted cursor-not-allowed' : 'text-term-fg-dim hover:text-term-fg'}`}
             >
-              Previous
+              [&lt; prev]
             </button>
-            <span className="text-gray-400">
+            <span className="text-term-fg-dim text-xs font-mono">
               Page {page} of {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-4 py-2 bg-gray-700 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600 transition-colors"
+              className={`text-xs font-mono ${page === totalPages ? 'text-term-fg-muted cursor-not-allowed' : 'text-term-fg-dim hover:text-term-fg'}`}
             >
-              Next
+              [next &gt;]
             </button>
           </div>
         )}
